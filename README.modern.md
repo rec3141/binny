@@ -22,5 +22,21 @@ binny run --assembly asm.fa --depth depth.tsv --db binny_db/ --outdir out/ --thr
 Defaults equal `config/config.default.yaml`. The Snakemake workflow (`binny`, `Snakefile`, `workflow/`) is left in
 place for comparison but no longer works on this branch (its scripts moved to `src/binny/`).
 
-Status: runs end to end on `test/contigs_4bins.fa` (4 bins, 96-100% complete, 97-98% pure). Comparison against
-upstream binny 2.2.18 and on CAMI II marine is in progress.
+**Same algorithm as the latest release.** Bioconda's binny 2.2.18 is built from `ohickl/binny` (tag 2.2.18, Aug 2023), a
+module-split version of this code. Of the 45 algorithm functions both share, 44 are identical (compared as Python
+syntax trees); the 45th differs by a renamed helper.
+
+**Validation on `test/contigs_4bins.fa`** (412 contigs, 4 genomes, 2 depth samples), against binny 2.2.18 from
+bioconda run on the same assembly and depth table:
+
+| | binny 2.2.18 (Prokka + Mantis) | this branch (pyrodigal + pyhmmer) |
+|---|---|---|
+| bins | 4 | 4 |
+| contig assignment | — | identical (adjusted Rand index 1.000, all 412 contigs) |
+| CheckM marker hits | 8,428 | 8,031 (82% shared per contig) |
+| completeness / purity labels | C96-97, P96-98 | C96-100, P97-98 |
+| setup | `binny -s`: CheckM download, Mantis + NLTK data, Prokka container; failed without manually installed NLTK data | `binny prepare-db` from CheckM data |
+| wall time, 8 threads | 7 min (after setup) | 4.8 min |
+
+The marker search (11,391 CheckM HMMs against every protein) dominates run time in both. A CAMI-scale comparison is
+the next check.

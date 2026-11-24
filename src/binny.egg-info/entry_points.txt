@@ -1,0 +1,2 @@
+[console_scripts]
+binny = binny.cli:main

@@ -10,16 +10,32 @@ from timeit import default_timer as timer
 import re
 
 import hdbscan
+
+
+def multiplicative_replacement(mat, delta=None):
+    """Replace zeros in compositions (rows) by delta and rescale the non-zero parts so rows sum to 1
+    (Martin-Fernandez et al. 2003; the same result as scikit-bio's multiplicative_replacement)."""
+    mat = np.asarray(mat, dtype=float)
+    mat = mat / mat.sum(axis=-1, keepdims=True)
+    z = mat == 0
+    n = mat.shape[-1]
+    if delta is None:
+        delta = (1.0 / n) ** 2
+    zcnts = 1 - z.sum(axis=-1, keepdims=True) * delta
+    return np.where(z, delta, zcnts * mat)
+
+
+def clr(mat):
+    """Centred log-ratio transform of strictly positive compositions (rows)."""
+    lmat = np.log(np.asarray(mat, dtype=float))
+    return lmat - lmat.mean(axis=-1, keepdims=True)
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from joblib import parallel_backend, Parallel, delayed
-from mpl_toolkits.mplot3d import Axes3D
 from openTSNE import TSNEEmbedding, affinity
 from openTSNE import initialization
-from skbio.stats.composition import clr, multiplicative_replacement
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -587,6 +603,7 @@ def contig_df_from_cluster_dict(cluster_dict):
 
 
 def write_scatterplot(df, hue, file_path=None):
+    import seaborn as sns  # only needed for plots
     palette = sns.color_palette("husl", len(set(hue)))
     sorted_set = []
     for i in hue:
@@ -604,7 +621,7 @@ def write_scatterplot(df, hue, file_path=None):
         df['cluster'] = hue
         palette_dict = {cluster: color for cluster, color in zip(sorted_set, palette)}
         fig = plt.figure()
-        ax = Axes3D(fig)
+        ax = fig.add_subplot(projection='3d')
         x = df['dim1']
         y = df['dim2']
         z = df['dim3']

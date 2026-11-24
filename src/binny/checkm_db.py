@@ -6,7 +6,7 @@ Created on Tue Apr 6 08:43:36 2021
 @author: oskar.hickl
 """
 
-import sys
+import sys  # noqa: F401
 from pathlib import Path
 
 
@@ -86,3 +86,22 @@ def remove_unused_checkm_hmm_profiles(hmmer_file, markers_sets_file, tigrfam2pfa
 
 
 #remove_unused_checkm_hmm_profiles(hmmer_file, markers_sets_file, tigrfam2pfam_file, out_file)
+
+
+def prepare_db(checkm_data, out_dir):
+    """Build binny's marker database from an unpacked CheckM v1 data directory (checkm_data_2015_01_16): the
+    lineage-sorted marker set table, tigrfam2pfam.tsv, and the CheckM HMMs restricted to markers used by the sets
+    (split into PFAM and TIGRFAM files), as the Snakemake workflow did."""
+    import os
+    import shutil
+    import pandas as pd
+    os.makedirs(os.path.join(out_dir, 'pfam'), exist_ok=True)
+    ms = pd.read_csv(os.path.join(checkm_data, 'taxon_marker_sets.tsv'), sep='\t', skipinitialspace=True, header=None)
+    ms = ms.sort_values(ms.columns[2])
+    ms.to_csv(os.path.join(out_dir, 'taxon_marker_sets_lineage_sorted.tsv'), header=None, index=None, sep='\t')
+    shutil.copy(os.path.join(checkm_data, 'pfam', 'tigrfam2pfam.tsv'), os.path.join(out_dir, 'pfam', 'tigrfam2pfam.tsv'))
+    remove_unused_checkm_hmm_profiles(os.path.join(checkm_data, 'hmms', 'checkm.hmm'),
+                                      os.path.join(checkm_data, 'taxon_marker_sets.tsv'),
+                                      os.path.join(checkm_data, 'pfam', 'tigrfam2pfam.tsv'),
+                                      os.path.join(out_dir, 'hmms'))
+    return out_dir

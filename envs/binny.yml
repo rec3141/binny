@@ -1,0 +1,18 @@
+name: binny
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.11
+  - numpy>=1.26
+  - pandas>=2.1
+  - pyarrow
+  - scipy
+  - scikit-learn>=1.3
+  - hdbscan>=0.8.33
+  - opentsne>=1.0
+  - networkx>=3
+  - matplotlib-base
+  - joblib
+  - pyrodigal>=3
+  - pyhmmer>=0.10

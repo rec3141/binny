@@ -1,0 +1,16 @@
+LICENSE
+README.md
+pyproject.toml
+src/binny/__init__.py
+src/binny/__main__.py
+src/binny/annotate.py
+src/binny/checkm_db.py
+src/binny/cli.py
+src/binny/functions.py
+src/binny/pipeline.py
+src/binny.egg-info/PKG-INFO
+src/binny.egg-info/SOURCES.txt
+src/binny.egg-info/dependency_links.txt
+src/binny.egg-info/entry_points.txt
+src/binny.egg-info/requires.txt
+src/binny.egg-info/top_level.txt
